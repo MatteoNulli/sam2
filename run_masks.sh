@@ -1,5 +1,5 @@
-python /data/chatgpt/notebooks/mnulli/sam2/submit.py \
-    /data/chatgpt/notebooks/mnulli/sam2/scripts/automatic_masks.sh \
+python submit.py \
+    scripts/automatic_masks.sh \
     --ems_project llava-finetuning \
     --experiment_name creating_masks_llava-pretrain \
     --cluster tess137 \
