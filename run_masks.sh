@@ -7,6 +7,6 @@ python submit.py \
     -i hub.tess.io/mnulli/llava_ov:latest \
     --gpu_per_node 4 \
     --num_nodes 1 \
-    --cpu 64 \
-    --memory 1000 \
+    --cpu 16 \
+    --memory 128 \
     --pvc
