@@ -77,20 +77,213 @@ def data_instance(args):
 
     return data
 
+# class SegmentationDataManager:
+#     def __init__(self, base_directory: str):
+#         """
+#         Initialize the manager with a base directory for storing all data.
+        
+#         Args:
+#             base_directory (str): Directory where all data will be stored
+#         """
+#         self.base_directory = base_directory
+#         self.arrays_dir = os.path.join(base_directory, "arrays")
+#         self.metadata_file = os.path.join(base_directory, "metadata.json")
+#         self.backup_file = os.path.join(base_directory, "metadata_backup.json")
+        
+#         # Create directories if they don't exist
+#         os.makedirs(self.arrays_dir, exist_ok=True)
+        
+#         # Initialize or recover metadata file
+#         self._initialize_or_recover_metadata()
+
+#     def _safe_json_read(self, filepath: str) -> Dict:
+#         """
+#         Safely read JSON file with error handling and recovery.
+#         """
+#         try:
+#             with open(filepath, 'r') as f:
+#                 return json.load(f)
+#         except json.JSONDecodeError:
+#             # Try to recover the JSON by reading until the last valid line
+#             with open(filepath, 'r') as f:
+#                 content = f.read()
+            
+#             # Find the last complete object (ending with })
+#             last_brace_index = content.rfind('}')
+#             if last_brace_index != -1:
+#                 valid_content = content[:last_brace_index + 1]
+#                 try:
+#                     return json.loads(valid_content)
+#                 except json.JSONDecodeError:
+#                     pass
+            
+#             # If recovery failed, return empty dict
+#             return {}
+
+#     def _safe_json_write(self, data: Dict, filepath: str) -> None:
+#         """
+#         Safely write JSON file using a temporary file.
+#         """
+#         # Create a temporary file in the same directory
+#         temp_dir = os.path.dirname(filepath)
+#         with tempfile.NamedTemporaryFile(mode='w', dir=temp_dir, delete=False) as tf:
+#             # Write to temporary file
+#             json.dump(data, tf, indent=2)
+#             temp_filepath = tf.name
+        
+#         # Rename temporary file to target file (atomic operation)
+#         shutil.move(temp_filepath, filepath)
+
+#     def _initialize_or_recover_metadata(self) -> None:
+#         """
+#         Initialize metadata file or recover from backup if main file is corrupted.
+#         """
+#         metadata = {}
+        
+#         # Try to read main metadata file
+#         if os.path.exists(self.metadata_file):
+#             metadata = self._safe_json_read(self.metadata_file)
+        
+#         # If main file is empty or corrupted, try backup
+#         if not metadata and os.path.exists(self.backup_file):
+#             metadata = self._safe_json_read(self.backup_file)
+        
+#         # Save recovered or empty metadata
+#         self._safe_json_write(metadata, self.metadata_file)
+#         # Create backup
+#         self._safe_json_write(metadata, self.backup_file)
+
+#     def list_image_keys(self):
+#         """
+#         Check if an image has already been processed and saved.
+#         """
+#         metadata = self._safe_json_read(self.metadata_file)
+#         image_keys_list = []  
+#         for image_key, val in metadata.items():
+#             image_keys_list.append(image_key)
+
+#         return image_keys_list
+    
+    
+#     def save_data(self, image_key: str, segmentations: List[Dict[str, Any]]) -> None:
+#         """
+#         Save multiple segmentation data for a single image.
+#         """
+#         # Create image directory
+#         image_arrays_dir = os.path.join(self.arrays_dir, image_key)
+#         os.makedirs(image_arrays_dir, exist_ok=True)
+        
+#         # Load existing metadata
+#         metadata = self._safe_json_read(self.metadata_file)
+        
+#         # Initialize or get existing image metadata
+#         metadata[image_key] = []
+        
+#         # Save each segmentation
+#         for idx, seg_dict in enumerate(segmentations):
+#             # Save the numpy array
+#             array_filename = f"segmentation_{idx}.npy"
+#             array_path = os.path.join(image_arrays_dir, array_filename)
+#             np.save(array_path, seg_dict['segmentation'])
+            
+#             # Prepare metadata
+#             meta_entry = seg_dict.copy()
+#             meta_entry['segmentation'] = array_filename
+            
+#             # Add metadata for this segmentation
+#             metadata[image_key].append(meta_entry)
+        
+#         # Save updated metadata and backup
+#         self._safe_json_write(metadata, self.metadata_file)
+#         self._safe_json_write(metadata, self.backup_file)
+        
+#     def process_dataset(self, data: List[Dict[str, str]], mask_generator: Any) -> None:
+#         """
+#         Process a dataset of images, generating and saving masks only for unprocessed images.
+#         """
+#         image_keys = self.list_image_keys()
+
+#         for i in tqdm(range(len(data))):
+#             # Get image key
+#             image_key = data[i]['image'].strip('/mnt/nushare2/data/baliao/multimodal/data/')
+            
+#             # Check if image has already been processed
+#             if image_key in image_keys:
+#                 continue
+            
+#             try:
+#                 # Get image path
+#                 image_path = data[i]['image']
+                    
+#                 # Process image and generate masks
+#                 image = Image.open(image_path)
+#                 image = np.array(image.convert("RGB"))
+#                 masks = mask_generator.generate(image)
+                
+#                 # Save masks
+#                 self.save_data(image_key, masks)
+                
+#             except Exception as e:
+#                 print(f"Error processing image {image_key}: {str(e)}")
+#                 continue
+
+    
+#     def load_data(self, image_key: str, indices: Union[int, List[int]] = None) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+#         """
+#         Load segmentation data for a specific image.
+#         """
+#         metadata = self._safe_json_read(self.metadata_file)
+            
+#         if image_key not in metadata:
+#             raise KeyError(f"No data found for image: {image_key}")
+        
+#         image_metadata = metadata[image_key]
+#         image_arrays_dir = os.path.join(self.arrays_dir, image_key)
+        
+#         # Handle single index
+#         if isinstance(indices, int):
+#             metadata = image_metadata[indices].copy()
+#             array_path = os.path.join(image_arrays_dir, metadata['segmentation'])
+#             metadata['segmentation'] = np.load(array_path)
+#             return metadata
+        
+#         # Handle multiple indices or None (all segmentations)
+#         load_indices = indices if indices is not None else range(len(image_metadata))
+#         result = []
+        
+#         for idx in load_indices:
+#             metadata = image_metadata[idx].copy()
+#             array_path = os.path.join(image_arrays_dir, metadata['segmentation'])
+#             metadata['segmentation'] = np.load(array_path)
+#             result.append(metadata)
+        
+#         return result
+
+import numpy as np
+import json
+import os
+from typing import Dict, Any, List, Union
+from tqdm import tqdm
+from PIL import Image
+import shutil
+import tempfile
+
+
 class SegmentationDataManager:
     def __init__(self, base_directory: str):
         """
-        Initialize the manager with a base directory for storing all data.
+        Initialize the manager with a base directory for storing metadata.
         
         Args:
-            base_directory (str): Directory where all data will be stored
+            base_directory (str): Directory where metadata will be stored
         """
         self.base_directory = base_directory
-        self.arrays_dir = os.path.join(base_directory, "arrays")
+        self.arrays_dir = os.path.join(base_directory, "arrays")  # Keep arrays_dir for backward compatibility
         self.metadata_file = os.path.join(base_directory, "metadata.json")
         self.backup_file = os.path.join(base_directory, "metadata_backup.json")
         
         # Create directories if they don't exist
+        os.makedirs(base_directory, exist_ok=True)
         os.makedirs(self.arrays_dir, exist_ok=True)
         
         # Initialize or recover metadata file
@@ -127,12 +320,41 @@ class SegmentationDataManager:
         # Create a temporary file in the same directory
         temp_dir = os.path.dirname(filepath)
         with tempfile.NamedTemporaryFile(mode='w', dir=temp_dir, delete=False) as tf:
+            # Convert numpy arrays to lists for JSON serialization
+            serializable_data = self._convert_arrays_to_lists(data)
             # Write to temporary file
-            json.dump(data, tf, indent=2)
+            json.dump(serializable_data, tf, indent=2)
             temp_filepath = tf.name
         
         # Rename temporary file to target file (atomic operation)
         shutil.move(temp_filepath, filepath)
+
+    def _convert_arrays_to_lists(self, data: Any) -> Any:
+        """
+        Convert numpy arrays to lists for JSON serialization.
+        """
+        if isinstance(data, dict):
+            return {k: self._convert_arrays_to_lists(v) for k, v in data.items()}
+        elif isinstance(data, list):
+            return [self._convert_arrays_to_lists(item) for item in data]
+        elif isinstance(data, np.ndarray):
+            return data.tolist()
+        else:
+            return data
+
+    def _convert_lists_to_arrays(self, data: Any) -> Any:
+        """
+        Convert lists back to numpy arrays when loading data.
+        """
+        if isinstance(data, dict):
+            return {k: self._convert_lists_to_arrays(v) for k, v in data.items()}
+        elif isinstance(data, list):
+            # Check if this list represents a segmentation array
+            if isinstance(data, list) and len(data) > 0 and isinstance(data[0], list):
+                return np.array(data)
+            return [self._convert_lists_to_arrays(item) for item in data]
+        else:
+            return data
 
     def _initialize_or_recover_metadata(self) -> None:
         """
@@ -158,40 +380,17 @@ class SegmentationDataManager:
         Check if an image has already been processed and saved.
         """
         metadata = self._safe_json_read(self.metadata_file)
-        image_keys_list = []  
-        for image_key, val in metadata.items():
-            image_keys_list.append(image_key)
-
-        return image_keys_list
-    
+        return list(metadata.keys())
     
     def save_data(self, image_key: str, segmentations: List[Dict[str, Any]]) -> None:
         """
-        Save multiple segmentation data for a single image.
+        Save multiple segmentation data for a single image directly in JSON.
         """
-        # Create image directory
-        image_arrays_dir = os.path.join(self.arrays_dir, image_key)
-        os.makedirs(image_arrays_dir, exist_ok=True)
-        
         # Load existing metadata
         metadata = self._safe_json_read(self.metadata_file)
         
-        # Initialize or get existing image metadata
-        metadata[image_key] = []
-        
-        # Save each segmentation
-        for idx, seg_dict in enumerate(segmentations):
-            # Save the numpy array
-            array_filename = f"segmentation_{idx}.npy"
-            array_path = os.path.join(image_arrays_dir, array_filename)
-            np.save(array_path, seg_dict['segmentation'])
-            
-            # Prepare metadata
-            meta_entry = seg_dict.copy()
-            meta_entry['segmentation'] = array_filename
-            
-            # Add metadata for this segmentation
-            metadata[image_key].append(meta_entry)
+        # Save segmentations directly in metadata
+        metadata[image_key] = segmentations
         
         # Save updated metadata and backup
         self._safe_json_write(metadata, self.metadata_file)
@@ -227,10 +426,31 @@ class SegmentationDataManager:
                 print(f"Error processing image {image_key}: {str(e)}")
                 continue
 
+    def _load_segmentation(self, image_key: str, metadata: Dict[str, Any]) -> np.ndarray:
+        """
+        Load segmentation data, handling both .npy files and direct JSON storage.
+        
+        Args:
+            image_key: Key of the image
+            metadata: Metadata dictionary containing segmentation data
+            
+        Returns:
+            np.ndarray: The loaded segmentation data
+        """
+        # If segmentation is a string, assume it's a .npy file path
+        if isinstance(metadata['segmentation'], str) and metadata['segmentation'].endswith('.npy'):
+            array_path = os.path.join(self.arrays_dir, image_key, metadata['segmentation'])
+            if os.path.exists(array_path):
+                return np.load(array_path)
+            else:
+                raise FileNotFoundError(f"Segmentation file not found: {array_path}")
+        # Otherwise, assume it's direct JSON data
+        else:
+            return np.array(metadata['segmentation'])
     
     def load_data(self, image_key: str, indices: Union[int, List[int]] = None) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         """
-        Load segmentation data for a specific image.
+        Load segmentation data for a specific image, supporting both .npy files and direct JSON storage.
         """
         metadata = self._safe_json_read(self.metadata_file)
             
@@ -238,27 +458,23 @@ class SegmentationDataManager:
             raise KeyError(f"No data found for image: {image_key}")
         
         image_metadata = metadata[image_key]
-        image_arrays_dir = os.path.join(self.arrays_dir, image_key)
         
         # Handle single index
         if isinstance(indices, int):
-            metadata = image_metadata[indices].copy()
-            array_path = os.path.join(image_arrays_dir, metadata['segmentation'])
-            metadata['segmentation'] = np.load(array_path)
-            return metadata
+            result = image_metadata[indices].copy()
+            result['segmentation'] = self._load_segmentation(image_key, result)
+            return result
         
         # Handle multiple indices or None (all segmentations)
         load_indices = indices if indices is not None else range(len(image_metadata))
         result = []
         
         for idx in load_indices:
-            metadata = image_metadata[idx].copy()
-            array_path = os.path.join(image_arrays_dir, metadata['segmentation'])
-            metadata['segmentation'] = np.load(array_path)
-            result.append(metadata)
+            entry = image_metadata[idx].copy()
+            entry['segmentation'] = self._load_segmentation(image_key, entry)
+            result.append(entry)
         
         return result
-
 
 
 if __name__ == "__main__":
@@ -266,7 +482,7 @@ if __name__ == "__main__":
     parser.add_argument("--sam2_checkpoint", type=str, default= "/data/chatgpt/notebooks/mnulli/sam2/checkpoints/sam2.1_hiera_large.pt")
     parser.add_argument("--model_cfg", type=str, default="/data/chatgpt/notebooks/mnulli/sam2/sam2/configs/sam2.1/sam2.1_hiera_l.yaml")
     parser.add_argument("--device", type=str, default='cuda')
-    parser.add_argument("--base_directory", type=str, default='/data/chatgpt/notebooks/mnulli/sam2/notebooks/segmentation_data')
+    parser.add_argument("--base_directory", type=str, default='/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data')
     parser.add_argument("--data_path", type=str, default='/mnt/nushare2/data/mnulli/pretrainingdata/blip_laion_cc_sbu_558k.json')
 
 
