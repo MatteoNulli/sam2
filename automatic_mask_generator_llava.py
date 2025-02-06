@@ -287,7 +287,7 @@ class SegmentationDataManager:
         os.makedirs(self.arrays_dir, exist_ok=True)
         
         # Initialize or recover metadata file
-        self._initialize_or_recover_metadata()
+        # self._initialize_or_recover_metadata()
 
     def _safe_json_read(self, filepath: str) -> Dict:
         """
@@ -385,6 +385,7 @@ class SegmentationDataManager:
     def save_data(self, image_key: str, segmentations: List[Dict[str, Any]]) -> None:
         """
         Save multiple segmentation data for a single image directly in JSON.
+        Only to use for single image.
         """
         # Load existing metadata
         metadata = self._safe_json_read(self.metadata_file)
@@ -402,6 +403,8 @@ class SegmentationDataManager:
         """
         image_keys = self.list_image_keys()
 
+        metadata = self._safe_json_read(self.metadata_file)
+
         for i in tqdm(range(len(data))):
             # Get image key
             image_key = data[i]['image'].strip('/mnt/nushare2/data/baliao/multimodal/data/')
@@ -412,7 +415,7 @@ class SegmentationDataManager:
             
             try:
                 # Get image path
-                image_path = data[i]['image']
+                image_path = '/home/mnulli1/data/LLaVA-Pretrain/' + data[i]['image']
                     
                 # Process image and generate masks
                 image = Image.open(image_path)
@@ -420,7 +423,13 @@ class SegmentationDataManager:
                 masks = mask_generator.generate(image)
                 
                 # Save masks
-                self.save_data(image_key, masks)
+                # Save segmentations directly in metadata
+                metadata[image_key] = masks
+                
+                # Save updated metadata and backup
+                self._safe_json_write(metadata, self.metadata_file)
+                self._safe_json_write(metadata, self.backup_file)
+                # self.save_data(image_key, masks)
                 
             except Exception as e:
                 print(f"Error processing image {image_key}: {str(e)}")
@@ -493,6 +502,10 @@ if __name__ == "__main__":
     mask_generator = sam2_instance(args)
 
     data = data_instance(args)
+
+    for element in data:
+        print(element)
+        break
 
     manager.process_dataset(data, mask_generator)
 
