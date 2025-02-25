@@ -1,11 +1,11 @@
 python submit.py \
-    scripts/automatic_masks.sh \
+    unzipping.sh \
     --ems_project llava-finetuning \
-    --experiment_name creating_masks_llava-pretrain \
+    --experiment_name unzipping9 \
     --cluster tess137 \
     -n chatgpt \
-    -i hub.tess.io/mnulli/llava_ov:latest \
-    --gpu_per_node 4 \
+    -i hub.tess.io/mnulli/sam2_support:latest \
+    --gpu_per_node 1 \
     --num_nodes 1 \
     --cpu 16 \
     --memory 128 \
