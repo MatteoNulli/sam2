@@ -15,13 +15,20 @@ export NO_PROXY=krylov,ams,ems,mms,localhost,127.0.0.1,.vip.hadoop.ebay.com,.vip
 
 
 ## Modifying permissions
+# N=0
 # chmod -R a+rw /mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_cap/arrays/partition_$N
-# chmod -R 777 /mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_cap/
-# echo Modified Perimssions of /mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_cap/
+
+
+for N in {0..9}; do
+    chmod -R a+rw "/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_cap/arrays/partition_${N}"
+done
+
+echo "Modified Permissions of /mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_cap/"
+
 
 # cd /opt/krylov-workflow/src/run_fn_0/
-N=9
-echo unzipping /mnt/nushare2/data/mnulli/thesis/data/sam2/partitions/partition_$N.tar.gz into /mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_cap/arrays/partition_$N
-tar -xvzf /mnt/nushare2/data/mnulli/thesis/data/sam2/partitions/partition_$N.tar.gz --strip-components=1 -C /mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_cap/arrays/partition_$N
+# N=9
+# echo unzipping /mnt/nushare2/data/mnulli/thesis/data/sam2/partitions/partition_$N.tar.gz into /mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_cap/arrays/partition_$N
+# tar -xvzf /mnt/nushare2/data/mnulli/thesis/data/sam2/partitions/partition_$N.tar.gz --strip-components=1 -C /mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_cap/arrays/partition_$N
 
 

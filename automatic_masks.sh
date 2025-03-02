@@ -18,19 +18,19 @@ pip install --upgrade --proxy http://httpproxy-tcop.vip.ebay.com:80 matplotlib
 SAM2_CHECKPOINT=/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data/checkpoints/sam2.1_hiera_large.pt
 DEVICE=cuda
 ##Captioning
-# echo creating masks for Captioning Data
-# DATA_PATH=/mnt/nushare2/data/mnulli/pretrainingdata/blip_laion_cc_sbu_558k.json
-# ARRAYS_DIR=/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_cap/arrays
-# METADATA_DIR=/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_cap/metadata
-# CAPTIONING=True
+echo creating masks for Captioning Data
+DATA_PATH=/mnt/nushare2/data/mnulli/pretrainingdata/blip_laion_cc_sbu_558k.json
+ARRAYS_DIR=/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_cap/arrays
+METADATA_DIR=/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_cap/metadata
+CAPTIONING=True
 ##SFT
-echo creating masks for SFT Data
-DATA_PATH=/mnt/nushare2/data/mnulli/verified_conversations/finetuningdata/format_adjusted_llava-mix665k.json
-ARRAYS_DIR=/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_sft/arrays
-METADATA_DIR=/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_sft/metadata    
-CAPTIONING=False
+# echo creating masks for SFT Data
+# DATA_PATH=/mnt/nushare2/data/mnulli/verified_conversations/finetuningdata/format_adjusted_llava-mix665k.json
+# ARRAYS_DIR=/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_sft/arrays
+# METADATA_DIR=/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_sft/metadata    
+# CAPTIONING=False
 
-PARTITION_ID=5
+PARTITION_ID=0
 TOTAL_PARTITIONS=10
 
 cd /opt/krylov-workflow/src/run_fn_0/
