@@ -1,7 +1,7 @@
 python submit.py \
     changing_permissions.sh \
     --ems_project thesis-train \
-    --experiment_name changing_permissions \
+    --experiment_name changing_permissions_sft \
     --cluster tess137 \
     -n chatgpt \
     -i hub.tess.io/vorshulevich/vllm:latest \

@@ -18,17 +18,23 @@ pip install --upgrade --proxy http://httpproxy-tcop.vip.ebay.com:80 matplotlib
 SAM2_CHECKPOINT=/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data/checkpoints/sam2.1_hiera_large.pt
 DEVICE=cuda
 ##Captioning
-echo creating masks for Captioning Data
+# echo creating masks for Captioning Data
 DATA_PATH=/mnt/nushare2/data/mnulli/pretrainingdata/blip_laion_cc_sbu_558k.json
-ARRAYS_DIR=/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_cap/arrays
-METADATA_DIR=/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_cap/metadata
-CAPTIONING=True
+# ARRAYS_DIR=/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_cap/arrays
+# METADATA_DIR=/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_cap/metadata
+# CAPTIONING=True
 ##SFT
 # echo creating masks for SFT Data
 # DATA_PATH=/mnt/nushare2/data/mnulli/verified_conversations/finetuningdata/format_adjusted_llava-mix665k.json
 # ARRAYS_DIR=/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_sft/arrays
 # METADATA_DIR=/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_sft/metadata    
 # CAPTIONING=False
+##BENCHMARKS
+echo creating masks for Benchmarks Data "aro"
+BENCHMARKS_IMAGES_DIR=/mnt/nushare2/data/mnulli/llava_ov/playground/gowitheflow___aro-visual-relation/combined
+ARRAYS_DIR=/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_benchmarks/gowitheflow___aro-visual-relation/arrays
+METADATA_DIR=/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_benchmarks/gowitheflow___aro-visual-relation/metadata
+CAPTIONING=False
 
 PARTITION_ID=0
 TOTAL_PARTITIONS=10
@@ -47,4 +53,5 @@ python automatic_mask_generator_llava.py \
     --data_path $DATA_PATH \
     --total-partitions $TOTAL_PARTITIONS \
     --partition-id $PARTITION_ID \
-    --captioning $CAPTIONING
+    --captioning $CAPTIONING \
+    --benchmark_images_dir $BENCHMARKS_IMAGES_DIR

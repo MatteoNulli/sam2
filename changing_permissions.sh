@@ -20,10 +20,10 @@ export NO_PROXY=krylov,ams,ems,mms,localhost,127.0.0.1,.vip.hadoop.ebay.com,.vip
 
 
 for N in {0..9}; do
-    chmod -R a+rw "/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_cap/arrays/partition_${N}"
+    chmod -R a+rwX "/mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_sft/arrays/partition_${N}"
 done
 
-echo "Modified Permissions of /mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_cap/"
+echo "Modified Permissions of /mnt/nushare2/data/mnulli/thesis/data/sam2/segmentation_data_sft"
 
 
 # cd /opt/krylov-workflow/src/run_fn_0/
